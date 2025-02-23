@@ -8,7 +8,7 @@ import tldextract
 
 # Determine initial theme from query parameters
 def get_initial_theme():
-    theme = st.query_params.get("theme", "light")
+    theme = st.query_params.get("theme", "dark")
     return theme
 
 # Set page configuration as the first Streamlit command
@@ -19,21 +19,7 @@ if 'theme' not in st.session_state:
     st.session_state.theme = get_initial_theme()
 
 def get_theme_css(theme):
-    if theme == 'light':
-        return """
-        :root {
-            --bg-primary: #f0f2f6;
-            --text-primary: #333;
-            --bg-secondary: #ffffff;
-            --accent-primary: #3498db;
-            --accent-secondary: #2980b9;
-            --text-header: #2c3e50;
-            --gradient-start: #3498db;
-            --gradient-end: #2c3e50;
-            --card-shadow: rgba(0,0,0,0.1);
-        }
-        """
-    else:
+    if theme == 'dark':
         return """
         :root {
             --bg-primary: #121212;
@@ -45,6 +31,20 @@ def get_theme_css(theme):
             --gradient-start: #2c3e50;
             --gradient-end: #4fc3f7;
             --card-shadow: rgba(255,255,255,0.1);
+        }
+        """
+    else:
+        return """
+        :root {
+            --bg-primary: #f0f2f6;
+            --text-primary: #333;
+            --bg-secondary: #ffffff;
+            --accent-primary: #3498db;
+            --accent-secondary: #2980b9;
+            --text-header: #2c3e50;
+            --gradient-start: #3498db;
+            --gradient-end: #2c3e50;
+            --card-shadow: rgba(0,0,0,0.1);
         }
         """
 
