@@ -258,49 +258,110 @@ def landing_page():
             else:
                 st.warning("⚠️ Veuillez entrer une URL valide.")
      
-    # Afficher le résultat en dessous de l'input
+# Afficher le résultat en dessous de l'input
     st.markdown("""
     <style>
         .result-card {
             font-size: 1.5em;
             font-weight: bold;
             text-align: center;
-            padding: 15px;
-            border-radius: 12px;
+            padding: 25px;
+            border-radius: 15px;
             margin-top: 20px;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s ease-in-out;
+            transition: transform 0.3s ease-in-out, opacity 0.5s ease-in-out, box-shadow 0.3s ease-in-out;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s ease-in-out forwards;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        
+    
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    
         .result-card:hover {
-            transform: scale(1.05);
+            transform: scale(1.02);
+            box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.3);
         }
-
+    
         .safe {
-            background-color: #D4EDDA;
+            background: linear-gradient(135deg, #D4EDDA, #C3E6CB);
             color: #155724;
             border: 2px solid #28a745;
         }
-
+    
         .phishing {
-            background-color: #F8D7DA;
+            background: linear-gradient(135deg, #F8D7DA, #F5C6CB);
             color: #721C24;
             border: 2px solid #dc3545;
         }
+    
+        .result-icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            animation: pulse 1.5s infinite;
+        }
+    
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    
+        .result-text {
+            font-size: 1.2em;
+            margin-top: 10px;
+            animation: textReveal 1s ease-in-out;
+        }
+    
+        @keyframes textReveal {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    
+        .reanalyze-button {
+            margin-top: 20px;
+            text-align: center;
+        }
+    
+        .reanalyze-button button {
+            background-color: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 10px 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+    
+        .reanalyze-button button:hover {
+            background-color: var(--accent-secondary);
+            transform: scale(1.05);
+        }
     </style>
     """, unsafe_allow_html=True)
-
+    
     # Afficher le message de résultat sous l'input, centré et stylisé
     if 'result' in st.session_state:
         result_text = st.session_state.result.lower()  # Convertir en minuscules pour éviter les erreurs
         if "légitime" in result_text or "sûr" in result_text or "valide" in result_text:
             result_class = "safe"
+            result_icon = "✅"  # Icône pour un site sûr
         else:
             result_class = "phishing"
+            result_icon = "⚠️"  # Icône pour un site suspect
     
         st.markdown(f"""
             <div class="result-card {result_class}">
-                {st.session_state.result}
+                <div class="result-icon">{result_icon}</div>
+                <div class="result-text">{st.session_state.result}</div>
             </div>
         """, unsafe_allow_html=True)
     
