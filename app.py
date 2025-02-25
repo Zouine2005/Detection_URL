@@ -361,7 +361,7 @@ footer_css = """
 """
 
 def landing_page():
-    # Theme Toggle
+    # Theme Toggle (inchangé)
     st.sidebar.header("🎨 Thème")
     theme_choice = st.sidebar.radio(
         "Choisissez votre thème", 
@@ -369,14 +369,14 @@ def landing_page():
         index=0 if st.session_state.theme == 'light' else 1
     )
 
-    # Update theme based on user selection
+    # Update theme based on user selection (inchangé)
     new_theme = 'light' if theme_choice == "Clair" else 'dark'
     if new_theme != st.session_state.theme:
         st.session_state.theme = new_theme
         st.query_params.update(theme=new_theme)
         st.rerun()
 
-    # Header with dynamic gradient background
+    # Header (inchangé)
     st.markdown(f"""
     <div style='background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); 
                 padding: 30px; 
@@ -389,27 +389,42 @@ def landing_page():
     </div>
     """, unsafe_allow_html=True)
     
-    # Include Font Awesome CSS
+    # Include Font Awesome CSS (inchangé)
     st.markdown("""
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     """, unsafe_allow_html=True)
+
+    # Initialisation des états dans st.session_state
+    if 'current_url' not in st.session_state:
+        st.session_state.current_url = ""
+    if 'result' not in st.session_state:
+        st.session_state.result = None
+
     # Centrer l'input et placer le bouton à droite
     col1, col2 = st.columns([3, 1])
     with col1:
-        url_input = st.text_input("Entrez l'URL à analyser (avec http:// ou https://) :", 
-                                  placeholder="https://www.example.com")
+        url_input = st.text_input(
+            "Entrez l'URL à analyser (avec http:// ou https://) :", 
+            placeholder="https://www.example.com",
+            key="url_input"  # Ajouter une clé unique pour suivre les changements
+        )
+        # Vérifier si l'URL a changé
+        if url_input != st.session_state.current_url:
+            st.session_state.current_url = url_input
+            st.session_state.result = None  # Réinitialiser le résultat
+
     with col2:
         st.write("")  # Espace vide pour aligner le bouton
         if st.button("Analyser l'URL"):
             if url_input:
                 with st.spinner("Analyse en cours..."):
                     result = predict_url(url_input)
-                    # Stocker le résultat dans session_state pour l'afficher plus bas
                     st.session_state.result = result
+                    st.session_state.current_url = url_input  # Mettre à jour l'URL courante
             else:
                 st.warning("⚠️ Veuillez entrer une URL valide.")
-     
-    # Afficher le résultat en dessous de l'input
+
+    # Styles pour le message de résultat (inchangés)
     st.markdown("""
     <style>
         .result-card {
@@ -431,93 +446,65 @@ def landing_page():
             margin-left: auto;
             margin-right: auto;
         }
-    
         @keyframes fadeInUp {
             to {
                 opacity: 1;
                 transform: translateY(0) rotateX(0);
             }
         }
-    
         .result-card:hover {
             transform: rotateY(15deg) rotateX(5deg) scale(1.05);
             box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
         }
-    
         .safe {
             background: linear-gradient(135deg, #D4EDDA, #C3E6CB);
             color: #155724;
             border: 2px solid #28a745;
         }
-    
         .phishing {
             background: linear-gradient(135deg, #F8D7DA, #F5C6CB);
             color: #721C24;
             border: 2px solid #dc3545;
         }
-    
         .result-icon {
             font-size: 2em;
             margin-bottom: 10px;
             animation: pulse 1.5s infinite;
         }
-    
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.1); }
             100% { transform: scale(1); }
         }
-    
         .result-text {
             font-size: 1em;
             margin-top: 10px;
             animation: textReveal 1s ease-in-out;
         }
-    
         @keyframes textReveal {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-    
-        .reanalyze-button {
-            margin-top: 20px;
-            text-align: center;
-        }
-    
-        .reanalyze-button button {
-            background-color: var(--accent-primary);
-            color: white;
-            border: none;
-            border-radius: 25px;
-            padding: 10px 25px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-        }
-    
-        .reanalyze-button button:hover {
-            background-color: var(--accent-secondary);
-            transform: scale(1.05);
-        }
     </style>
     """, unsafe_allow_html=True)
-    
-    # Afficher le message de résultat sous l'input, centré et stylisé
-    if 'result' in st.session_state:
-        result_text = st.session_state.result.lower()  # Convertir en minuscules pour éviter les erreurs
+
+    # Afficher le message de résultat uniquement si un résultat existe
+    if st.session_state.result:
+        result_text = st.session_state.result.lower()
         if "légitime" in result_text or "sûr" in result_text or "valide" in result_text:
             result_class = "safe"
-            result_icon = "✅"  # Icône pour un site sûr
+            result_icon = "✅"
         else:
             result_class = "phishing"
-            result_icon = "⚠️"  # Icône pour un site suspect
-    
+            result_icon = "⚠️"
         st.markdown(f"""
             <div class="result-card {result_class}">
                 <div class="result-icon">{result_icon}</div>
                 <div class="result-text">{st.session_state.result}</div>
             </div>
         """, unsafe_allow_html=True)
+    
+     
         
     # Afficher les résultats d'analyse sous forme de trois cards
     svg_icon = """
