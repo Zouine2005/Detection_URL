@@ -5,6 +5,7 @@ import re
 from urllib.parse import urlparse
 from sklearn.preprocessing import StandardScaler
 import tldextract
+import random
 
 # Determine initial theme from query parameters
 def get_initial_theme():
@@ -212,6 +213,152 @@ def predict_url(url):
     else:
         return "✅ Site sûr ! 👍"
 
+# Footer generation functions and styles
+def generate_bubbles(n=20):
+    bubbles = []
+    for _ in range(n):
+        size = 2 + random.random() * 4
+        distance = 6 + random.random() * 4
+        position = -5 + random.random() * 110
+        time = 2 + random.random() * 2
+        delay = -1 * (2 + random.random() * 2)
+        style = f"--size:{size}rem; --distance:{distance}rem; --position:{position}%; --time:{time}s; --delay:{delay}s;"
+        bubbles.append(f'<div class="bubble" style="{style}"></div>')
+    return "\n".join(bubbles)
+
+def get_footer_html():
+    bubbles_html = generate_bubbles(20)
+    footer_content = """
+<div class="content">
+    <div>
+        <div>
+            <b>Phishing Detector</b>
+            <p>© 2025 - Created By Zouine Mohamed</p>
+        </div>
+    </div>
+    <div>
+        <a href="#" target="_blank" title="GitHub"><i class="fa fa-github" style="font-size:24px"></i></a>
+        <a href="#" target="_blank" title="LinkedIn"><i class="fa fa-linkedin" style="font-size:24px"></i></a>
+    </div>
+</div>
+    """
+    footer_html = f"""
+<div class="footer">
+    <div class="bubbles">
+        {bubbles_html}
+    </div>
+{footer_content}
+</div>
+    """
+    return footer_html
+
+svg_filter = """
+<svg style="position:fixed; top:100vh">
+    <defs>
+        <filter id="blob">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"></feGaussianBlur>
+            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="blob"></feColorMatrix>
+        </filter>
+    </defs>
+</svg>
+"""
+
+footer_css = """
+.footer {
+    z-index: 1;
+    --footer-background: #0E1117;
+    display: grid;
+    position: relative;
+    min-height: 12rem;
+    width: 100%;
+}
+
+.footer .bubbles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1rem;
+    background: #49B2E1;
+    filter: url("#blob");
+}
+
+.footer .bubble {
+    position: absolute;
+    left: var(--position, 50%);
+    background: var(--footer-background);
+    border-radius: 100%;
+    animation: bubble-size var(--time, 4s) ease-in infinite var(--delay, 0s),
+               bubble-move var(--time, 4s) ease-in infinite var(--delay, 0s);
+    transform: translate(-50%, 100%);
+}
+
+.footer .content {
+    z-index: 2;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-gap: 4rem;
+    padding: 2rem;
+    background: var(--footer-background);
+}
+
+.footer .content a, .footer .content p {
+    color: #F5F7FA;
+    text-decoration: none;
+}
+
+.footer .content b {
+    color: white;
+}
+
+.footer .content p {
+    margin: 0;
+    font-size: .75rem;
+}
+
+.footer .content > div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.footer .content > div > div {
+    margin: 0.25rem 0;
+}
+
+.footer .content > div > div > * {
+    margin-right: .5rem;
+}
+
+.footer .content .image {
+    align-self: center;
+    width: 4rem;
+    height: 4rem;
+    margin: 0.25rem 0;
+    background-size: cover;
+    background-position: center;
+}
+
+@keyframes bubble-size {
+    0%, 75% {
+        width: var(--size, 4rem);
+        height: var(--size, 4rem);
+    }
+    100% {
+        width: 0rem;
+        height: 0rem;
+    }
+}
+
+@keyframes bubble-move {
+    0% {
+        bottom: -4rem;
+    }
+    100% {
+        bottom: var(--distance, 10rem);
+    }
+}
+"""
 
 def landing_page():
     # Theme Toggle
@@ -242,6 +389,10 @@ def landing_page():
     </div>
     """, unsafe_allow_html=True)
     
+    # Include Font Awesome CSS
+    st.markdown("""
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    """, unsafe_allow_html=True)
     # Centrer l'input et placer le bouton à droite
     col1, col2 = st.columns([3, 1])
     with col1:
@@ -258,36 +409,39 @@ def landing_page():
             else:
                 st.warning("⚠️ Veuillez entrer une URL valide.")
      
-# Afficher le résultat en dessous de l'input
+    # Afficher le résultat en dessous de l'input
     st.markdown("""
     <style>
         .result-card {
-            font-size: 1.5em;
+            font-size: 1.2em;
             font-weight: bold;
             text-align: center;
-            padding: 25px;
-            border-radius: 15px;
+            padding: 15px;
+            border-radius: 10px;
             margin-top: 20px;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s ease-in-out, opacity 0.5s ease-in-out, box-shadow 0.3s ease-in-out;
+            transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out, box-shadow 0.3s ease-in-out;
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(20px) rotateX(90deg);
             animation: fadeInUp 0.5s ease-in-out forwards;
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(5px);
             border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 60%;
+            margin-left: auto;
+            margin-right: auto;
         }
     
         @keyframes fadeInUp {
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0) rotateX(0);
             }
         }
     
         .result-card:hover {
-            transform: scale(1.02);
-            box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.3);
+            transform: rotateY(15deg) rotateX(5deg) scale(1.05);
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
         }
     
         .safe {
@@ -303,8 +457,8 @@ def landing_page():
         }
     
         .result-icon {
-            font-size: 2.5em;
-            margin-bottom: 15px;
+            font-size: 2em;
+            margin-bottom: 10px;
             animation: pulse 1.5s infinite;
         }
     
@@ -315,7 +469,7 @@ def landing_page():
         }
     
         .result-text {
-            font-size: 1.2em;
+            font-size: 1em;
             margin-top: 10px;
             animation: textReveal 1s ease-in-out;
         }
@@ -364,7 +518,7 @@ def landing_page():
                 <div class="result-text">{st.session_state.result}</div>
             </div>
         """, unsafe_allow_html=True)
-    
+        
     # Afficher les résultats d'analyse sous forme de trois cards
     svg_icon = """
 <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#4AB2E1" class="bi bi-diagram-3-fill" viewBox="0 0 16 16">
@@ -377,7 +531,6 @@ def landing_page():
         <h2 style="margin: 0;">Statistiques</h2>
     </div>
     """, unsafe_allow_html=True)
-
 
     col1, col2, col3 = st.columns(3)
     
@@ -413,7 +566,7 @@ def landing_page():
         """, unsafe_allow_html=True)
     
     # Information Section
-        svg_icon = """
+    svg_icon = """
 <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#4AB2E1"  class="bi bi-lightning-charge-fill" viewBox="0 0 16 16">
   <path d="M11.251.068a.5.5 0 0 1 .227.58L9.677 6.5H13a.5.5 0 0 1 .364.843l-8 8.5a.5.5 0 0 1-.842-.49L6.323 9.5H3a.5.5 0 0 1-.364-.843l8-8.5a.5.5 0 0 1 .615-.09z"/>
 </svg>
@@ -469,23 +622,17 @@ def landing_page():
             </div>
         </div>
         """, unsafe_allow_html=True)
-    
-    # Footer avec les icônes de réseaux sociaux
-    st.markdown("---")
-    st.markdown(f"""
-    <div class="footer">
-        <p>© 2025 Détecteur de Phishing. Tous droits réservés.</p>
-        <div class="social-icons">
-            <a href="https://twitter.com" target="_blank">𝕏</a>
-            <a href="https://linkedin.com" target="_blank">🔗</a>
-            <a href="https://github.com" target="_blank">🐙</a>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
 
-# Affichage de la page d'accueil
 def main():
     landing_page()
+    st.markdown(f"""
+    
+        <style>
+            {footer_css}
+        </style>
+            {svg_filter}
+        {get_footer_html()}
+    """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
